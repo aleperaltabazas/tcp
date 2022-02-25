@@ -4,6 +4,8 @@ module Control.Monad.TCP
   ( SocketT
   , receive
   , send
+  , connect
+  , disconnect
   , runCleanSocketT
   , runSocketT
   )
@@ -29,10 +31,16 @@ send m = SocketT $ do
 runCleanSocketT
   :: (TCP.TCPSerializable s, MonadIO m) => String -> Int -> SocketT s m a -> m a
 runCleanSocketT host port sockT = do
-  sock <- liftIO $ TCP.connect host port
+  sock <- liftIO $ connect host port
   a    <- runSocketT sock sockT
-  liftIO $ TCP.disconnect sock
+  liftIO $ disconnect sock
   return a
+
+connect :: TCP.TCPSerializable s => String -> Int -> IO (TCP.Socket s)
+connect = TCP.connect
+
+disconnect :: TCP.Socket s -> IO ()
+disconnect = TCP.disconnect
 
 runSocketT :: (TCP.TCPSerializable s) => TCP.Socket s -> SocketT s m a -> m a
 runSocketT sock (SocketT r) = runReaderT r sock
