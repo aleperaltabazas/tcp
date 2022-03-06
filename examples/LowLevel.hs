@@ -8,7 +8,7 @@ data Message
   = Hello
   | Bye
 
-instance TCPSerializable Message where
+instance Packet Message where
   serialize Hello = "hello"
   serialize Bye   = "bye"
 

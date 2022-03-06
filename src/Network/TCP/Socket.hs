@@ -1,6 +1,6 @@
 module Network.TCP.Socket
   ( Socket(..)
-  , TCPSerializable(..)
+  , Packet(..)
   , socketReceive
   , socketSend
   , socketListen
@@ -22,19 +22,19 @@ newtype Socket s
   { unSocket :: S.Socket
   }
 
-class TCPSerializable s where
+class Packet s where
   serialize  :: s -> BL.ByteString
   deserialize :: BL.ByteString  -> Maybe s
 
-instance TCPSerializable BL.ByteString where
+instance Packet BL.ByteString where
   serialize   = id
   deserialize = Just
 
-instance TCPSerializable () where
+instance Packet () where
   serialize = mempty
   deserialize _ = Just ()
 
-socketSend :: TCPSerializable s => Socket s -> s -> IO ()
+socketSend :: Packet s => Socket s -> s -> IO ()
 socketSend (Socket socket) s = do
   let bytes = serialize s
   let len   = BL.length bytes
@@ -42,7 +42,7 @@ socketSend (Socket socket) s = do
   let buf   = size <> bytes
   S.send socket buf
 
-socketReceive :: TCPSerializable s => Socket s -> IO (Maybe s)
+socketReceive :: Packet s => Socket s -> IO (Maybe s)
 socketReceive (Socket socket) = do
   sizeBuf <- S.receive int64Size socket
   let size = Binary.decode sizeBuf :: Int64
@@ -50,11 +50,11 @@ socketReceive (Socket socket) = do
   return $ deserialize buf
   where int64Size = 8
 
-socketListen :: TCPSerializable s => Int -> IO (Socket s)
+socketListen :: Packet s => Int -> IO (Socket s)
 socketListen port = do
   sock <- S.bindTo port
   S.listen sock 1
   return $ Socket sock
 
-socketAccept :: TCPSerializable s => Socket s -> IO (Socket s)
+socketAccept :: Packet s => Socket s -> IO (Socket s)
 socketAccept = fmap (Socket . fst) . S.accept . unSocket
