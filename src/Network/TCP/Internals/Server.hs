@@ -1,7 +1,6 @@
 module Network.TCP.Internals.Server
   ( bindTo
   , receive
-  , listen
   )
 where
 
@@ -9,19 +8,18 @@ import qualified Data.ByteString.Lazy          as BL
 import           Data.Int                       ( Int
                                                 , Int64
                                                 )
-import           Network.Socket                 ( setCloseOnExecIfNeeded
-                                                , withSocketsDo
-                                                , setSocketOption
-                                                , bind
-                                                , listen
-                                                , socket
-                                                , withFdSocket
-                                                , AddrInfo
+import           Network.Socket                 ( AddrInfo
                                                   ( addrFamily
                                                   , addrSocketType
                                                   , addrProtocol
                                                   , addrAddress
                                                   )
+                                                , setCloseOnExecIfNeeded
+                                                , withSocketsDo
+                                                , setSocketOption
+                                                , bind
+                                                , socket
+                                                , withFdSocket
                                                 , SocketOption(ReuseAddr)
                                                 , Socket
                                                 )

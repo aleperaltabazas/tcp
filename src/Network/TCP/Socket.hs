@@ -3,6 +3,8 @@ module Network.TCP.Socket
   , TCPSerializable(..)
   , socketReceive
   , socketSend
+  , socketListen
+  , socketAccept
   )
 where
 
@@ -28,6 +30,10 @@ instance TCPSerializable BL.ByteString where
   serialize   = id
   deserialize = Just
 
+instance TCPSerializable () where
+  serialize = mempty
+  deserialize _ = Just ()
+
 socketSend :: TCPSerializable s => Socket s -> s -> IO ()
 socketSend (Socket socket) s = do
   let bytes = serialize s
@@ -43,3 +49,12 @@ socketReceive (Socket socket) = do
   buf <- S.receive size socket
   return $ deserialize buf
   where int64Size = 8
+
+socketListen :: TCPSerializable s => Int -> IO (Socket s)
+socketListen port = do
+  sock <- S.bindTo port
+  S.listen sock 1
+  return $ Socket sock
+
+socketAccept :: TCPSerializable s => Socket s -> IO (Socket s)
+socketAccept = fmap (Socket . fst) . S.accept . unSocket

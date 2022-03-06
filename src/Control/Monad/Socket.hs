@@ -1,12 +1,13 @@
 {-# LANGUAGE GeneralisedNewtypeDeriving #-}
 
-module Control.Monad.TCP
+module Control.Monad.Socket
   ( SocketT
+  , TCP.Socket
   , receive
   , send
   , connect
   , disconnect
-  , runCleanSocketT
+  , listen
   , runSocketT
   )
 where
@@ -28,19 +29,15 @@ send m = SocketT $ do
   sock <- ask
   liftIO $ TCP.send sock m
 
-runCleanSocketT
-  :: (TCP.TCPSerializable s, MonadIO m) => String -> Int -> SocketT s m a -> m a
-runCleanSocketT host port sockT = do
-  sock <- liftIO $ connect host port
-  a    <- runSocketT sock sockT
-  liftIO $ disconnect sock
-  return a
-
 connect :: TCP.TCPSerializable s => String -> Int -> IO (TCP.Socket s)
 connect = TCP.connect
 
 disconnect :: TCP.Socket s -> IO ()
 disconnect = TCP.disconnect
 
-runSocketT :: (TCP.TCPSerializable s) => TCP.Socket s -> SocketT s m a -> m a
+runSocketT
+  :: (TCP.TCPSerializable s, MonadIO m) => TCP.Socket s -> SocketT s m a -> m a
 runSocketT sock (SocketT r) = runReaderT r sock
+
+listen :: TCP.TCPSerializable s => Int -> IO (TCP.Socket s)
+listen = TCP.listen

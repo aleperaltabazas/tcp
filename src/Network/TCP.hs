@@ -6,6 +6,8 @@ module Network.TCP
   , connect
   , close
   , disconnect
+  , listen
+  , accept
   )
 where
 
@@ -26,3 +28,9 @@ receive = socketReceive
 
 close = S.close . unSocket
 disconnect = close
+
+listen :: TCPSerializable s => Int -> IO (Socket s)
+listen = socketListen
+
+accept :: TCPSerializable s => Socket s -> IO (Socket s)
+accept = socketAccept
