@@ -29,6 +29,29 @@ dependencies:
 library:
   source-dirs: src
 
+executables:
+  tcp-low-level-demo:
+    main: LowLevel.hs
+    source-dirs: examples
+    other-modules: []
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - tcp
+
+  tcp-monad-demo:
+    main: Monad.hs
+    source-dirs: examples
+    other-modules: []
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - tcp
+
 tests:
   tcp-test:
     main: Spec.hs

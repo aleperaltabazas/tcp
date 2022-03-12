@@ -3,7 +3,8 @@
 module Main where
 
 import           Control.Monad
-import           Network.TCP
+import           Control.Monad.Socket
+import           Control.Monad.IO.Class
 import           System.Environment
 
 data Message
@@ -21,21 +22,19 @@ instance Packet Message where
 server = do
   sock <- listen 9290 :: IO (Socket Message)
   forever $ do
-    client <- accept sock
-    putStrLn "new client"
-    Just Hello <- receive client
-    putStrLn "saying goodbye"
-    send client Bye
-    close client
+    acceptSocketT sock $ do
+      liftIO $ putStrLn "new client"
+      Just Hello <- receive
+      liftIO $ putStrLn "saying goodbye"
+      send Bye
     putStrLn "client closed"
 
-client = do
-  sock <- connect "localhost" 9290 :: IO (Socket Message)
-  putStrLn "connected. saying hi"
-  send sock Hello
-  Just Bye <- receive sock
-  putStrLn "response received. closing..."
-  close sock
+client :: IO ()
+client = connectSocketT "localhost" 9290 $ do
+  liftIO $ putStrLn "connected. saying hi"
+  send Hello
+  Just Bye <- receive
+  liftIO $ putStrLn "response received. closing..."
 
 main :: IO ()
 main = do
@@ -44,3 +43,4 @@ main = do
     ["client"] -> client
     ["server"] -> server
     _          -> putStrLn "usage: tcp-low-level-demo client | server"
+
