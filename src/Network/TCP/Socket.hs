@@ -8,14 +8,14 @@ module Network.TCP.Socket
   )
 where
 
-import qualified Network.Socket                as S
-import qualified Network.TCP.Internals.Client  as S
-import qualified Network.TCP.Internals.Server  as S
-import qualified Data.Binary                   as Binary
-import qualified Data.ByteString               as BS
-import qualified Data.ByteString.Char8         as C8
-import qualified Data.ByteString.Lazy          as BL
-import           Data.Int                       ( Int64 )
+import qualified Data.Binary                  as Binary
+import qualified Data.ByteString              as BS
+import qualified Data.ByteString.Char8        as C8
+import qualified Data.ByteString.Lazy         as BL
+import           Data.Int                     (Int64)
+import qualified Network.Socket               as S
+import qualified Network.TCP.Internals.Client as S
+import qualified Network.TCP.Internals.Server as S
 
 newtype Socket s
   = Socket

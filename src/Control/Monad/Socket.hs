@@ -18,7 +18,7 @@ module Control.Monad.Socket
 where
 
 import           Control.Monad.Reader
-import qualified Network.TCP                   as TCP
+import qualified Network.TCP          as TCP
 
 newtype SocketT s m a
   = SocketT (ReaderT (TCP.Socket s) m a)
@@ -43,18 +43,21 @@ disconnect = TCP.disconnect
 runSocketT :: (TCP.Packet s, MonadIO m) => TCP.Socket s -> SocketT s m a -> m a
 runSocketT sock (SocketT r) = runReaderT r sock
 
-connectSocketT
-  :: (TCP.Packet s, MonadIO m) => String -> Int -> SocketT s m a -> m a
+connectSocketT :: (TCP.Packet s, MonadIO m) => String -> Int -> SocketT s m a -> m a
 connectSocketT host port s = do
   sock <- liftIO $ connect host port
   res  <- runSocketT sock s
   liftIO $ disconnect sock
   return res
 
-acceptSocketT
-  :: (TCP.Packet s, MonadIO m) => TCP.Socket s -> SocketT s m a -> m a
+acceptSocketT :: (TCP.Packet s, MonadIO m) => TCP.Socket s -> SocketT s m a -> m a
 acceptSocketT sock s = do
   client <- liftIO $ TCP.accept sock
   res    <- runSocketT client s
   liftIO $ disconnect client
   return res
+
+startTCPServer :: TCP.Packet s => Int -> SocketT s IO () -> IO ()
+startTCPServer port handleNewClient = do
+  sock <- TCP.listen port
+  forever $ acceptSocketT sock handleNewClient
